@@ -242,7 +242,10 @@ void taskUsart1(void *param)
 {
 	while(1)
 	{
-		HAL_UART_Receive(&huart1, &serialChar, 1, 10);
+		if(HAL_UART_Receive(&huart1, &serialChar, 1, 10) == HAL_OK)
+		{
+			xTaskNotifyGive(taskHandle2);
+		}
 	}
 
 	taskYIELD();
@@ -250,9 +253,21 @@ void taskUsart1(void *param)
 
 void taskFunc2(void *param)
 {
+	uint32_t taskNotificationFlag = 0;
+
 	while(1)
 	{
+		taskNotificationFlag = ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
+		if(taskNotificationFlag != 0)
+		{
+			HAL_UART_Transmit(&huart1, &serialChar, 1, 10);
+		}
+
+		else
+		{
+
+		}
 	}
 
 	taskYIELD();
